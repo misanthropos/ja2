@@ -11,10 +11,10 @@ const char g_version_label[] =
 	"Beta v. 0.98";
 #else
 	//RELEASE BUILD VERSION
-	"Release v0.12 - Walnut";
+	"Release v0.15 - Creamy";
 #endif
 
-char const g_version_number[16] = "Build 04.12.02";
+char const g_version_number[16] = "Build 05.03.12";
 CASSERT(lengthof(g_version_number) == 16)
 
 
