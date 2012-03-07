@@ -2432,8 +2432,13 @@ BOOLEAN PlayersBetweenTheseSectors(INT16 const sec_src, INT16 const sec_dst, INT
 
 		INT16 const sec_prev = SECTOR(g.ubPrevX,   g.ubPrevY);
 		INT16 const sec_cur  = SECTOR(g.ubSectorX, g.ubSectorY);
-		INT16 const sec_next = SECTOR(g.ubNextX,   g.ubNextY);
-
+                INT16  sec_next;
+                // if next sector is not defined it should be the current sector
+                if (g.ubNextX == 0 || g.ubNextY == 0) {
+                  sec_next = sec_cur;
+                }
+                else  sec_next = SECTOR(g.ubNextX,   g.ubNextY);
+                  
 		bool const may_retreat_from_battle =
 			sec_battle == sec_src && sec_cur == sec_src && sec_prev == sec_dst;
 
