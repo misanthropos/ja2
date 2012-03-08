@@ -720,32 +720,41 @@ void SetCurrentWorldSector(INT16 const x, INT16 const y, INT8 const z)
 	gWorldSectorX  = x;
 	gWorldSectorY  = y;
 	gbWorldSectorZ = z;
-
+        #ifdef JA2BETAVERSION
+        {
+          char str[256];
+          sprintf(str, "We are at: (x:%d ,y:%d, z:%d).", x, y, z);
+          DebugMsg( TOPIC_JA2, DBG_LEVEL_3, str );
+        }
+        #endif
 	// update currently selected map sector to match
 	ChangeSelectedMapSector(x, y, z);
 
 	bool const loading_savegame = gTacticalStatus.uiFlags & LOADING_SAVED_GAME;
 	if (loading_savegame)
 	{
-		SetMusicMode(MUSIC_MAIN_MENU);
+          SetMusicMode(MUSIC_MAIN_MENU);
 	}
 	else
 	{
-    StopAnyCurrentlyTalkingSpeech();
+          StopAnyCurrentlyTalkingSpeech();
 
-		/* Check to see if the sector we are loading is the cave sector under Tixa.
-		 * If so then we will set up the meanwhile scene to start the creature
-		 * quest. */
-		if (x == 9 && y == 10 && z == 2)
-		{
-			InitCreatureQuest(); // Ignored if already active.
-		}
-
-		gTacticalStatus.uiTimeSinceLastInTactical = GetWorldTotalMin();
-		InitializeTacticalStatusAtBattleStart();
+          /* Check to see if the sector we are loading is the cave sector under Tixa.
+           * If so then we will set up the meanwhile scene to start the creature
+           * quest. */
+          if (x == 9 && y == 10 && z == 2)
+            {
+              #ifdef JA2BETAVERSION
+              DebugMsg (TOPIC_JA2, DBG_LEVEL_3, "Creature Quest is going to be initialzed");
+              #endif
+              InitCreatureQuest(); // Ignored if already active.
+            }
+          
+          gTacticalStatus.uiTimeSinceLastInTactical = GetWorldTotalMin();
+          InitializeTacticalStatusAtBattleStart();
 	  HandleHelicopterOnGroundSkyriderProfile();
 	}
-
+        
 	EnterSector(x, y, z);
 
 	if (!loading_savegame)

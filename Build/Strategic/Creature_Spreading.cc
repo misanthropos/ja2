@@ -272,7 +272,9 @@ void InitCreatureQuest()
 
 	if( giLairID )
 	{
-		return; //already active!
+          DebugMsg (TOPIC_JA2, DBG_LEVEL_3, "Creature Quest is already active!");
+          printf ("Lair ID: %d\n", giLairID);
+          return; //already active!
 	}
 
 	#ifdef JA2BETAVERSION
@@ -280,6 +282,7 @@ void InitCreatureQuest()
 	{
 		fPlayMeanwhile = TRUE;
 	}
+
 	#else
 		fPlayMeanwhile = TRUE;
 	#endif
