@@ -2434,8 +2434,8 @@ BOOLEAN PlayersBetweenTheseSectors(INT16 const sec_src, INT16 const sec_dst, INT
 		INT16 const sec_cur  = SECTOR(g.ubSectorX, g.ubSectorY);
                 INT16  sec_next;
                 // if next sector is not defined it should be the current sector
-                if (g.ubNextX == 0 || g.ubNextY == 0) {
-                  sec_next = sec_cur;
+                if (g.ubNextX == 0 && g.ubNextY == 0) {
+                  sec_next = -1; // invalidate next sector since its not defined
                 }
                 else  sec_next = SECTOR(g.ubNextX,   g.ubNextY);
                   
