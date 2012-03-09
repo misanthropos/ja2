@@ -40,7 +40,8 @@
 #include "Quests.h"
 #include "Queen_Command.h"
 #include "Debug.h"
-
+#include "Input.h"
+#include "English.h"
 
 #define AI_DELAY 100
 
@@ -642,6 +643,18 @@ void EndAIGuysTurn(SOLDIERTYPE& s)
 	DebugAI(String("Ending control for %d", s.ubID));
 #endif
 
+#ifdef JA2TESTVERSION
+        // skip militas turn by holding shift
+        if (s.bTeam == MILITIA_TEAM && _KeyDown( SHIFT ))
+          {
+            while ( RemoveFirstAIListEntry() )
+              {
+                // we are simply looping through them all to empty the stack of militia AI
+              }
+          }
+#endif
+        
+         
 	// Find the next AI guy
 	if (SOLDIERTYPE* const s = RemoveFirstAIListEntry())
 	{

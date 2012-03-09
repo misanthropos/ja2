@@ -40,7 +40,8 @@
 #include "NPC.h"
 #include "Debug.h"
 #include "Items.h"
-
+#include "Input.h"
+#include "English.h"
 
 static SOLDIERTYPE* gOutOfTurnOrder[MAXMERCS];
 UINT8 gubOutOfTurnPersons = 0;
@@ -285,6 +286,18 @@ void BeginTeamTurn( UINT8 ubTeam )
 {
 	while( 1 )
 	{
+          #ifdef JA2TESTVERSION
+          // skip militias turn if holding shift
+          if ( ubTeam == MILITIA_TEAM && _KeyDown( SHIFT ) )
+            {
+              // player wants to skip militia turn
+              ubTeam++;
+              gTacticalStatus.ubCurrentTeam++;
+              // skip back to the top, as we are processing another team now.
+              continue;
+            }
+
+          #endif
 		if ( ubTeam > LAST_TEAM )
 		{
 			if ( HandleAirRaidEndTurn( ubTeam ) )
