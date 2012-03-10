@@ -51,6 +51,7 @@ UINT32 Random(UINT32 uiRange)
 	 * The rather complex limitation ensures a correct behaviour even
 	 * for very large (close to RAND_MAX) values of uiRange.
 	 */
+
 	do { x = rand(); } while ( x >= (((RAND_MAX - uiRange + 1)/uiRange+1)*uiRange));
 	return x % uiRange;
 }

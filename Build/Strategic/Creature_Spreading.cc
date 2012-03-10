@@ -77,7 +77,6 @@
 #define NORMAL_CREATURE_TOWN_AGGRESSIVENESS	0
 #define HARD_CREATURE_TOWN_AGGRESSIVENESS		10
 
-
 //This is how many creatures the queen produces for each cycle of spreading.  The higher
 //the numbers the faster the creatures will advance.
 #define EASY_QUEEN_REPRODUCTION_BASE				6 //6-7
@@ -92,16 +91,6 @@
 //inside the function PrepareCreaturesForBattle() in this module.
 BOOLEAN gfUseCreatureMusic = FALSE;
 BOOLEAN gfCreatureMeanwhileScenePlayed = FALSE;
-enum
-{
-	QUEEN_LAIR,				//where the queen lives.  Highly protected
-	LAIR,							//part of the queen's lair -- lots of babies and defending mothers
-	LAIR_ENTRANCE,		//where the creatures access the mine.
-	INNER_MINE,				//parts of the mines that aren't close to the outside world
-	OUTER_MINE,				//area's where miners work, close to towns, creatures love to eat :)
-	FEEDING_GROUNDS,	//creatures love to populate these sectors :)
-	MINE_EXIT,				//the area that creatures can initiate town attacks if lots of monsters.
-};
 
 struct CREATURE_DIRECTIVE
 {
@@ -310,7 +299,8 @@ void InitCreatureQuest()
 
 	/* Determine which of the four mines are infectible by creatures. Infectible
 	 * mines are those that are player controlled and unlimited. We don't want the
-	 * creatures to infect the mine that runs out. */
+	 * creatures to infect the mine that runs out or are enemy controlled 
+         * or Headminer was attacked. */
 	fMineInfectible[0] = IsMineInfectible(MINE_DRASSEN);
 	fMineInfectible[1] = IsMineInfectible(MINE_CAMBRIA);
 	fMineInfectible[2] = IsMineInfectible(MINE_ALMA);
@@ -375,15 +365,16 @@ void InitCreatureQuest()
 			curr->uiFlags |= SF_PENDING_ALTERNATE_MAP;
 			break;
 		default:
-			#ifdef JA2BETAVERSION
+#ifdef JA2BETAVERSION
 			{
 				wchar_t str[512];
-				swprintf(str, lengthof(str), L"Creature quest never chose a lair and won't infect any mines.  Infectible mines = %d, iRandom = %d.  "
-											 L"This isn't a bug if you are not receiving income from any mines.", iNumMinesInfectible, iOrigRandom );
+				swprintf(str, lengthof(str), 
+                                         L"Creature quest never chose a lair and won't infect any mines.  Infectible mines = %d, iRandom = %d.  "
+                                         L"This isn't a bug if you are not receiving income from any mines.", iNumMinesInfectible, iOrigRandom );
 				DoScreenIndependantMessageBox( str, MSG_BOX_FLAG_OK, NULL );
 			}
-			#endif
-			return;
+#endif
+			return;  // if no mine infected
 	}
 
 	//Now determine how often we will spread the creatures.
@@ -990,8 +981,8 @@ BOOLEAN MineClearOfMonsters( UINT8 ubMineIndex )
 }
 
 void DetermineCreatureTownComposition( UINT8 ubNumCreatures,
-																			 UINT8 *pubNumYoungMales, UINT8 *pubNumYoungFemales,
-																			 UINT8 *pubNumAdultMales, UINT8 *pubNumAdultFemales )
+                                       UINT8 *pubNumYoungMales, UINT8 *pubNumYoungFemales,
+                                       UINT8 *pubNumAdultMales, UINT8 *pubNumAdultFemales )
 {
 	INT32 i, iRandom;
 	UINT8 ubYoungMalePercentage = 10;
@@ -1081,7 +1072,7 @@ BOOLEAN PrepareCreaturesForBattle()
 	UINT8 ubNumAdultMales = 0;
 	UINT8 ubNumAdultFemales = 0;
 	UINT8 ubNumCreatures;
-
+        DebugMsg (TOPIC_JA2, DBG_LEVEL_3, "Prepare Creatures for Battle called!");
 	if( !gubCreatureBattleCode )
 	{
 		//By default, we only play creature music in the cave levels (the creature levels all consistently
@@ -1096,10 +1087,19 @@ BOOLEAN PrepareCreaturesForBattle()
 		{
 			return FALSE;
 		}
+                //DebugMsg (TOPIC_JA2, DBG_LEVEL_3, "Sector Exists!");
 		if( !pSector->ubNumCreatures )
 		{
 			return FALSE;
 		}
+
+#ifdef JA2BETAVERSION
+                DebugMsg (TOPIC_JA2, DBG_LEVEL_3, "Creatures Exist!");
+                // ok - we are in a dungeon and creatures seem to exist print the habitat we are in
+                char str[256];
+                sprintf (str, "Habitat: %d Creatures: %d", pSector->ubCreatureHabitat, pSector->ubNumCreatures);
+                DebugMsg( TOPIC_JA2, DBG_LEVEL_3, str );
+#endif
 		gfUseCreatureMusic = TRUE; //creatures are here, so play creature music
 		ubCreatureHabitat = pSector->ubCreatureHabitat;
 		ubNumCreatures = pSector->ubNumCreatures;
@@ -1159,8 +1159,9 @@ BOOLEAN PrepareCreaturesForBattle()
 			ubAdultMalePercentage = 10;
 			ubAdultFemalePercentage = 30;
 			break;
-		case OUTER_MINE:
-		case MINE_EXIT:
+                case FEEDING_GROUNDS:
+                case OUTER_MINE:
+                case MINE_EXIT:
 			fQueen = FALSE;
 			ubLarvaePercentage = 0;
 			ubInfantPercentage = 0;
@@ -1349,9 +1350,9 @@ void LoadCreatureDirectives(HWFILE const hFile, UINT32 const uiSavedGameVersion)
 		case 3:		InitLairAlma();			break;
 		case 4:		InitLairGrumm();		break;
 		default:
-			#ifdef JA2BETAVERSION
+#ifdef JA2BETAVERSION
 				ScreenMsg( FONT_RED, MSG_ERROR, L"Invalid restoration of creature lair ID of %d.  Save game potentially hosed.", giLairID );
-			#endif
+#endif
 			break;
 	}
 }

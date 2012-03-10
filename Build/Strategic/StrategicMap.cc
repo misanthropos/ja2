@@ -747,7 +747,16 @@ void SetCurrentWorldSector(INT16 const x, INT16 const y, INT8 const z)
               #ifdef JA2BETAVERSION
               DebugMsg (TOPIC_JA2, DBG_LEVEL_3, "Creature Quest is going to be initialzed");
               #endif
+              // make sure the loaded sector (underground tixa prison) is treated as feeding ground
+              UNDERGROUND_SECTORINFO *pSector = NULL;
+              pSector = FindUnderGroundSector( x, y, z);
+              Assert ( pSector );
+              // make sure Tixa is a feeding ground for Creatures
+              pSector->ubCreatureHabitat = FEEDING_GROUNDS; // set this value for Tixa Feeding Ground
               InitCreatureQuest(); // Ignored if already active.
+              // if there are any creatures left (for whatever reason - prepare them to fight)
+              // somehow after clearing a level 
+              if (pSector->ubNumCreatures) PrepareCreaturesForBattle();
             }
           
           gTacticalStatus.uiTimeSinceLastInTactical = GetWorldTotalMin();
@@ -898,7 +907,19 @@ void PrepareLoadedSector()
 			}
 		}
 		#endif
-
+ 
+#ifdef JA2BETAVERSION
+                if( gbWorldSectorZ > 0 )
+                  {
+                    wchar_t str[256];
+                    UNDERGROUND_SECTORINFO *pSector;
+                    pSector = FindUnderGroundSector( gWorldSectorX, gWorldSectorY, gbWorldSectorZ );
+                    swprintf (str, sizeof(str), L"Admins: %d, Troops: %d, Elites:%d, Creatures: %d",
+                              (UINT8)pSector->ubNumAdmins, (UINT8)pSector->ubNumTroops, 
+                              (UINT8)pSector->ubNumElites, (UINT8)pSector->ubNumCreatures  );
+                    //DoScreenIndependantMessageBox( str, MSG_BOX_FLAG_OK, NULL );
+                  }
+#endif
 		PrepareCreaturesForBattle();
 
 		PrepareMilitiaForTactical();
