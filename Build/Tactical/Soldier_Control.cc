@@ -6441,10 +6441,10 @@ void ReleaseSoldiersAttacker( SOLDIERTYPE *pSoldier )
 	INT32 cnt;
 	UINT8	ubNumToFree;
 
-	//if ( gTacticalStatus.uiFlags & TURNBASED && (gTacticalStatus.uiFlags & INCOMBAT) )
+	if ( gTacticalStatus.uiFlags & TURNBASED && (gTacticalStatus.uiFlags & INCOMBAT) )
 	{
 		// ATE: Removed...
-		//if (pSoldier->attacker != NULL)
+		if (pSoldier->attacker != NULL)
 		{
 			// JA2 Gold
 			// set next-to-previous attacker, so long as this isn't a repeat attack
@@ -9048,7 +9048,9 @@ static void EnableDisableSoldierLightEffects(BOOLEAN const enable_lights)
 		{ // Delete the fake light the merc casts
 			DeleteSoldierLight(s);
 			// Light up the merc though
-			SetSoldierPersonalLightLevel(s);
+                        // make sure s is not NULL
+                        Assert (s != NULL);
+                        SetSoldierPersonalLightLevel(s);
 		}
 	}
 }
@@ -9059,8 +9061,21 @@ static void SetSoldierPersonalLightLevel(SOLDIERTYPE* const s)
 	if (!s || s->sGridNo == NOWHERE) return;
 	// The light level for the soldier
 	LEVELNODE& n = *gpWorldLevelData[s->sGridNo].pMercHead;
-	n.ubShadeLevel        = 3;
-	n.ubSumLights         = 5;
-	n.ubMaxLights         = 5;
-	n.ubNaturalShadeLevel = 5;
+
+        #ifdef JA2TESTVERSION
+        if ( &n != NULL )
+          printf ("soldier s->sGridNo: %d ... grid: %d name: %ls\n", s->sGridNo, (int)gpWorldLevelData[s->sGridNo].pMercHead, gpWorldLevelData[s->sGridNo].pMercHead->pSoldier->name);
+        else
+          printf ("corrupted grid:  s->sGridNo: %d ... grid: %d\n", s->sGridNo, (int)gpWorldLevelData[s->sGridNo].pMercHead);
+        #endif
+        /* make sure there actually was a pMercHead (if in HELI there is none, or at least sometimes..... savegames include a "dead" pointer)
+           and set values accordingly... otherwise do nothing */
+        Assert (  &n != NULL );
+        if ( &n != NULL) {
+          n.ubShadeLevel        = 3;
+          n.ubSumLights         = 5;
+          n.ubMaxLights         = 5;
+          n.ubNaturalShadeLevel = 5;
+        }
+        
 }
